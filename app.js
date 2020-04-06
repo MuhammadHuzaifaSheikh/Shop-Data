@@ -6,6 +6,7 @@ var search = document.getElementById('search');
 var savebtn = document.getElementById('save');
 var db = firebase.firestore();
 
+var totalInc;
 
 var totalQuantity;
 
@@ -87,8 +88,7 @@ function list() {
                     td2.innerHTML = u.buy;
                     td3.innerHTML =u.sell;
                     td4.innerHTML = u.quntity;
-                    td5.innerHTML = u.income
-
+                    // td5.innerHTML = u.income
 
                 }
                 if (change.type === "removed") {
@@ -125,7 +125,7 @@ function rander(u) {
     w2.innerHTML = 'Buy Prize';
     w3.innerHTML = 'Sell Prize';
     w4.innerHTML = 'Quantity';
-    w5.innerHTML = 'Income';
+    // w5.innerHTML = 'Income';
     w6.innerHTML = 'Edit';
 
 
@@ -133,7 +133,7 @@ function rander(u) {
     z2.innerHTML = u.buy;
     z3.innerHTML = u.sell;
     z4.innerHTML = u.quntity;
-    z5.innerHTML = u.income;
+    // z5.innerHTML = u.income;
 
     var editButton = document.createElement("button");
 
@@ -180,7 +180,6 @@ function searchByProduct(n) {
             querySnapshot.forEach(function (doc) {
                 console.log(doc.id, " => ", doc.data());
             id = doc.id;
-            totalIncome(doc.data());
                 console.log(doc.data());
 
                 var docRef = db.collection("shop").doc(id);
@@ -234,7 +233,7 @@ function searchByProduct(n) {
 
                     console.log(totalQuantity);
                     td5.innerHTML  =(totalQuantity- td4.innerHTML)*income;
-
+                    totalInc=(totalQuantity- td4.innerHTML)*income;
 
 
 
@@ -246,14 +245,15 @@ function searchByProduct(n) {
 
 
                             quntity: td4.innerHTML,
-                            income : td5.innerHTML,
+                            // income : td5.innerHTML,
 
 
 
                         });
 
 
-
+                        // totalInc=  td5.innerHTML;
+                        // console.log(totalInc);
                         console.log(doc.data());
 
 
@@ -262,6 +262,8 @@ function searchByProduct(n) {
 
                         thh4.innerHTML = '';
                         thh5.innerHTML = '';
+
+                        totalIncome(doc.data());
 
 
 
@@ -288,7 +290,13 @@ function searchByProduct(n) {
 
 }
 
-var p;
+var d = new Date();
+var dates1=d.getDate();
+var t = d.toLocaleTimeString();
+var m = d.getMonth();
+var y =d.getFullYear();
+
+var totalDate = dates1+'/'+m+'/'+y;
 
 
 
@@ -296,7 +304,9 @@ var p;
 function totalIncome(inc) {
     db.collection("totalincome").add({
         productName:inc.product ,
-        totalIncome: inc.income,
+        totalIncome:totalInc,
+        dateOFProduct : totalDate,
+        timeOFProduct : t,
     })
         .then(function (docRef) {
             console.log("Document written with ID: ", docRef.id);
@@ -307,11 +317,20 @@ function totalIncome(inc) {
             console.error("Error adding document: ", error);
         });
 }
+function seeIncome() {
+    db.collection("totalincome")
+        .onSnapshot(function(snapshot) {
+            snapshot.docChanges().forEach(function(change) {
+                if (change.type === "added") {
+                    console.log("New city: ", change.doc.data());
+                }
+                if (change.type === "modified") {
+                    console.log("Modified city: ", change.doc.data());
+                }
+                if (change.type === "removed") {
+                    console.log("Removed city: ", change.doc.data());
+                }
+            });
+        });
 
-var docRef = db.collection("totalincome").doc('vg1WnC5GKvVKwL8gLqqY');
-
-docRef.get().then(function(doc) {
-    console.log(doc.data());
-}).catch(function(error) {
-    console.log("Error getting document:", error);
-});
+}
