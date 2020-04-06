@@ -9,7 +9,7 @@ var db = firebase.firestore();
 
 var totalQuantity;
 
-
+var id;
 
 var isUpdate;
 var updatedId;
@@ -53,7 +53,7 @@ function saveData() {
                 product.value = "";
                 buy.value = "";
                 sell.value = "";
-                quntity.value = 0;
+                quntity.value = '';
             })
             .catch(function (error) {
                 console.error("Error adding document: ", error);
@@ -71,8 +71,7 @@ function list() {
                 console.log(u);
                 console.log(change);
 
-                totalQuantity=u.quntity;
-                console.log(totalQuantity);
+
                 if (change.type === "added") {
                     rander(u);
                     console.log("New city: ", change.doc.data());
@@ -83,10 +82,12 @@ function list() {
                     var td2 = td1.nextSibling;
                     var td3 = td2.nextSibling;
                     var td4 = td3.nextSibling;
+                    var td5 = td4.nextSibling;
                     td1.innerHTML =u.product;
                     td2.innerHTML = u.buy;
                     td3.innerHTML =u.sell;
-                    td4.innerHTML = u.quntity
+                    td4.innerHTML = u.quntity;
+                    td5.innerHTML = u.income
 
 
                 }
@@ -132,7 +133,7 @@ function rander(u) {
     z2.innerHTML = u.buy;
     z3.innerHTML = u.sell;
     z4.innerHTML = u.quntity;
-    z5.innerHTML = 0;
+    z5.innerHTML = u.income;
 
     var editButton = document.createElement("button");
 
@@ -178,32 +179,38 @@ function searchByProduct(n) {
         .then(function (querySnapshot) {
             querySnapshot.forEach(function (doc) {
                 console.log(doc.id, " => ", doc.data());
-
+            id = doc.id;
+            totalIncome(doc.data());
                 console.log(doc.data());
 
+                var docRef = db.collection("shop").doc(id);
+
+                docRef.get().then(function(doc) {
+                    console.log(doc.data());
+                    totalQuantity=doc.data().quntity;
+                }).catch(function(error) {
+                    console.log("Error getting document:", error);
+                });
+
+
                 var thh1 = document.getElementById('thh1');
-                var thh2 = document.getElementById('thh2');
-                var thh3 = document.getElementById('thh3');
+
                 var thh4 = document.getElementById('thh4');
                 var thh5 = document.getElementById('thh5');
 
 
                 var td1 = document.getElementById('td1');
-                var td2 = document.getElementById('td2');
-                var td3 = document.getElementById('td3');
+
                 var td4 = document.getElementById('td4');
                 var td5 = document.getElementById('td5');
                 var q = doc.data().quntity;
 
                 thh1.innerHTML = 'Product Name';
-                thh2.innerHTML = 'Buy Prize';
-                thh3.innerHTML = 'Sell Prize';
                 thh4.innerHTML = 'Quantity';
                 thh5.innerHTML = 'Income';
 
                 td1.innerHTML = doc.data().product;
-                td2.innerHTML = doc.data().buy;
-                td3.innerHTML = doc.data().sell;
+
                 td4.innerHTML = q;
                 td5.innerHTML = 0;
 
@@ -221,19 +228,21 @@ function searchByProduct(n) {
 
                     }
 
-                else{
+                    else{
                         alert('Please Insert Some Product')
                     }
 
                     console.log(totalQuantity);
-                    td5.innerHTML=(totalQuantity- td4.innerHTML)*income;
+                    td5.innerHTML  =(totalQuantity- td4.innerHTML)*income;
+
+
 
 
                     var updatebtn2= document.getElementById('updatebtn2');
-                        updatebtn2.innerHTML='OK/Save';
+                    updatebtn2.innerHTML='OK/Save';
                     updatebtn2.addEventListener('click',function () {
 
-                        db.collection("shop").doc().update({
+                        db.collection("shop").doc(id).update({
 
 
                             quntity: td4.innerHTML,
@@ -242,7 +251,24 @@ function searchByProduct(n) {
 
 
                         });
+
+
+
                         console.log(doc.data());
+
+
+
+                        thh1.innerHTML = '';
+
+                        thh4.innerHTML = '';
+                        thh5.innerHTML = '';
+
+
+
+
+
+
+
 
                     })
                 });
@@ -261,3 +287,31 @@ function searchByProduct(n) {
 
 
 }
+
+var p;
+
+
+
+
+function totalIncome(inc) {
+    db.collection("totalincome").add({
+        productName:inc.product ,
+        totalIncome: inc.income,
+    })
+        .then(function (docRef) {
+            console.log("Document written with ID: ", docRef.id);
+
+
+        })
+        .catch(function (error) {
+            console.error("Error adding document: ", error);
+        });
+}
+
+var docRef = db.collection("totalincome").doc('vg1WnC5GKvVKwL8gLqqY');
+
+docRef.get().then(function(doc) {
+    console.log(doc.data());
+}).catch(function(error) {
+    console.log("Error getting document:", error);
+});
